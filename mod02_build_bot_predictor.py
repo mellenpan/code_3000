@@ -17,7 +17,6 @@ def train_model(X, y, seed=seed):
         subsample=.8,
         min_samples_leaf=10,
         random_state=seed
-    
     )
     model.fit(X, y)
     return model
