@@ -1,5 +1,7 @@
 import pandas as pd
 
+ID_COLS = {"anon_id", "name"}
+
 def load_data(anonymized_path, auxiliary_path):
     """
     Load anonymized and auxiliary datasets.
