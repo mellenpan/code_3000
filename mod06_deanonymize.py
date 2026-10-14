@@ -2,6 +2,7 @@ import pandas as pd
 
 ID_COLS = {"anon_id", "name"}
 
+
 def load_data(anonymized_path, auxiliary_path):
     """
     Load anonymized and auxiliary datasets.
@@ -10,49 +11,60 @@ def load_data(anonymized_path, auxiliary_path):
     aux = pd.read_csv(auxiliary_path)
     return anon, aux
 
+
 def _quasi_identifiers(anon_df, aux_df):
-    """Helper func to deside which columns to match"""
-    return [c for c in anon_df.columns if c in aux_df.columns and c not in ID_COLS]
+    """
+    Determine which columns can be used for matching.
+    """
+    return [
+        c for c in anon_df.columns
+        if c in aux_df.columns and c not in ID_COLS
+    ]
 
 
 def link_records(anon_df, aux_df):
     """
-    Attempt to link anonymized records to auxiliary records
-    using exact matching on quasi-identifiers.
+    Link anonymized records to auxiliary records using exact matching
+    on quasi-identifiers.
 
-    Returns a DataFrame with columns:
-      anon_id, matched_name
-    containing ONLY uniquely matched records.
+    Return only uniquely matched records.
     """
     qi = _quasi_identifiers(anon_df, aux_df)
-    if not qi:
+
+    if not qi or "anon_id" not in anon_df.columns or "name" not in aux_df.columns:
         return pd.DataFrame(columns=["anon_id", "matched_name"])
 
-    # Rows w/o quasi-identifiers can't be matched
     anon = anon_df.dropna(subset=qi)
     aux = aux_df.dropna(subset=qi)
 
-    # Keep  quasi-identifier combinations that occur exactly once per side
-    anon_unique = anon  
-    aux_unique = aux[~aux.duplicated(subset=qi, keep=False)]
+    anon_unique = anon.loc[
+        ~anon.duplicated(subset=qi, keep=False)
+    ]
+    aux_unique = aux.loc[
+        ~aux.duplicated(subset=qi, keep=False)
+    ]
 
     merged = anon_unique[["anon_id"] + qi].merge(
-        aux_unique[["name"] + qi], on=qi, how="inner"
+        aux_unique[["name"] + qi],
+        on=qi,
+        how="inner",
+        validate="one_to_one"
     )
 
     return (
-        merged.rename(columns={"name": "matched_name"})[["anon_id", "matched_name"]]
+        merged.rename(columns={"name": "matched_name"})
+        [["anon_id", "matched_name"]]
+        .drop_duplicates()
         .reset_index(drop=True)
     )
 
 
 def deanonymization_rate(matches_df, anon_df):
     """
-    Compute the fraction of anonymized records
-    that were uniquely re-identified.
+    Compute the fraction of anonymized records that were uniquely
+    re-identified.
     """
-    #empty
-    if len(anon_df) == 0:
+    if anon_df.empty:
         return 0.0
-    #has contents
+
     return matches_df["anon_id"].nunique() / len(anon_df)
