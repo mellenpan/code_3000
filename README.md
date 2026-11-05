@@ -16,3 +16,6 @@ Your goal is to connect anonymized data back to its source data and check the ma
 
 ### Module 08: Sustainability in Computing
 You will be given a toy dataset and have the opportunity to explore the potential effects of choosing sustainable energy sources to perform computations. You'll code the energy calculation in "sustainability calculations" script, and then you can review the results of various decisions in the "check calculations" notebook. 
+
+### Module 9: Personal Ethics Statement
+I believe that ethics includeds more than just values, but actually creating a limitation and standard on how AI should be used and developed. Although morals and values are great to have, abd are the backbone of all cange, they are just thoughts until they are implemented and forced into societal norms. Even if AI may be smarter and handle complex problems more efficently, tey need to be restricted to prevent AI from replacing humans. 
